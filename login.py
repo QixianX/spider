@@ -1,11 +1,15 @@
 from  selenium import webdriver
 import time
 import re
-import album
+import photo
+import info
 
-#登录获取url的程序
+
+#登录获取url的程序，后台运行浏览器
 def loginn(name,pwd):
-    browser = webdriver.Chrome()
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    browser = webdriver.Chrome(chrome_options=chrome_options)
     browser.get('https://user.qzone.qq.com')
 
 
@@ -21,16 +25,22 @@ def loginn(name,pwd):
     use.send_keys(name)
 
 
-#定位密码框并输入
+#定位密码框并输入，判断是否登录成功
     ps = browser.find_element_by_id('p')
     ps.send_keys(pwd)
     btn = browser.find_element_by_id('login_button')
     time.sleep(0.5)
     btn.click()
     time.sleep(0.5)
-    
-    
- #跳转到个人主页
+    right = 'https://user.qzone.qq.com/'+name
+    now_url = browser.current_url
+    if now_url == right:
+        print('登录成功')
+    else:
+        print('账号或密码错误')
+        
+  
+#跳转到我的主页
     inf = browser.find_element_by_link_text("我的主页")
     inf.click()
 
@@ -40,7 +50,6 @@ def loginn(name,pwd):
     hashes = 5381
     for i in browser.get_cookies():
         cookie[i["name"]] = i["value"]
-    print(cookie)
         
 
 #计算gtk
@@ -52,7 +61,7 @@ def loginn(name,pwd):
     
  #获得token
     html = browser.page_source
-    g_qzonetoken=re.search('window\.g_qzonetoken = \(function\(\)\{ try\{return (.*?);\} catch\(e\)',html)
+    g_qzonetoken=re.search('window\.g_qzonetoken = \(function\(\)\{ try\{return (.*?);\} catch\(e\)',html)#从网页源码中提取g_qzonetoken
     g_qzonetoken = str(g_qzonetoken[0]).split('\"')[1]
     g_qzonetoken =str(g_qzonetoken)
 
@@ -62,10 +71,11 @@ def loginn(name,pwd):
           '/cgi-bin/user/cgi_userinfo_get_all?uin='+name+\
           '&vuin='+name+'&fupdate=1&rd='+'0.7137596336600174'+\
           '&g_tk='+hashes+'&qztoken='+g_qzonetoken
-    pass
+    page = browser.get(url)
+    html1 = browser.page_source
+    info.inf(html1)
 
-
-    
+   
 #获得相册html,调用保存函数
     url1 = 'https://h5.qzone.qq.com/proxy/domain/photo.qzon'+\
            'e.qq.com/fcgi-bin/fcg_list_album_v3?g_tk='+\
@@ -76,12 +86,30 @@ def loginn(name,pwd):
            'Fun=shine0&_=1533627125951'
     time.sleep(1)
     page = browser.get(url1)
-    html = browser.page_source 
-    album.al(html)
+    html = browser.page_source
+    time.sleep(1)
+    pid = re.findall('"id" : "(.*?)"', html)
+    count = 0
+    time.sleep(1)
+    for i in pid:
+        alid = i
+        url =  'https://h5.qzone.qq.com/proxy/domain/photo.qzone.'+\
+              'qq.com/fcgi-bin/cgi_list_photo?g_tk='+hashes+'&callback'+\
+              '=shine0_Callback&t=984071564&mode=0&idcNum=4'+\
+              '&hostUin='+name+'&topicId='+alid+'&noTopic=0&uin='+name+\
+              '&pageStart=0&pageNum=30&skipCmtCount=0&singleurl='+\
+              '1&batchId=&notice=0&appid=4&inCharset=utf-8&outCharset='+\
+              'utf-8&source=qzone&plat=qzone&outstyle=json&format=jsonp&json_esc=1&questi'+\
+              'on=&answer=&callbackFun=shine0&_=1533781622395'      
+        page = browser.get(url)
+        html = browser.page_source
+        time.sleep(2)
+        photo.save(html,count)
+        count+=1
+    
 
-#好友列表
-    #url2 =
-    pass
+
+
 
 
 
