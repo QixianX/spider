@@ -131,4 +131,6 @@ def loginn(name,pwd):
         page = browser.get(url)
         html = browser.page_source
         undergo.then(html)
-        
+    else:
+        print('用户名或密码错误')
+        browser.quit()
