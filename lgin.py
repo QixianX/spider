@@ -40,8 +40,8 @@ def loginn(name,pwd):
         print('登录成功')
     else:
         print('账号或密码错误')
-        
-  
+              
+          
 #跳转到我的主页
     inf = browser.find_element_by_link_text("我的主页")
     inf.click()
