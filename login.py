@@ -3,6 +3,8 @@ import time
 import re
 import photo
 import info
+import undergo
+import flist
 
 
 #登录获取url的程序，后台运行浏览器
@@ -61,7 +63,8 @@ def loginn(name,pwd):
     
  #获得token
     html = browser.page_source
-    g_qzonetoken=re.search('window\.g_qzonetoken = \(function\(\)\{ try\{return (.*?);\} catch\(e\)',html)#从网页源码中提取g_qzonetoken
+    g_qzonetoken=re.search('window\.g_qzonetoken'+\
+                           ' = \(function\(\)\{ try\{return (.*?);\} catch\(e\)',html)
     g_qzonetoken = str(g_qzonetoken[0]).split('\"')[1]
     g_qzonetoken =str(g_qzonetoken)
 
@@ -75,11 +78,24 @@ def loginn(name,pwd):
     html1 = browser.page_source
     info.inf(html1)
 
+
+#获取好友列表并保存在本地
+    url = 'https://user.qzone.qq.com/proxy/dom'+\
+          'ain/r.qzone.qq.com/cgi-bin/tfriend/f'+\
+          'riend_ship_manager.cgi?uin='+name+\
+          '&do=1&rd=0.07649617356193117&fupd'+\
+          'ate=1&clean=1&g_tk='+hashes+'&qzonetoken='+\
+          g_qzonetoken+'&g_tk='+hashes
+    page = browser.get(url)
+    html = browser.page_source
+    flist.then(html)
+
    
 #获得相册html,调用保存函数
     url1 = 'https://h5.qzone.qq.com/proxy/domain/photo.qzon'+\
            'e.qq.com/fcgi-bin/fcg_list_album_v3?g_tk='+\
-           hashes+'&callback=shine0_Callback&t=261523179&hostUin='+name+'&uin='+name+\
+           hashes+'&callback=shine0_Callback&t=26152317'+\
+           '9&hostUin='+name+'&uin='+name+\
            '&appid=4&inCharset=utf-8&outCharset=utf-8&source=qzone&plat=qzone'\
            +'&format=jsonp&notice=0&filter=1&handset=4&pageNumModeSort=40&'+\
            'pageNumModeClass=15&needUserInfo=1&idcNum=4&callback'+\
@@ -106,9 +122,19 @@ def loginn(name,pwd):
         time.sleep(2)
         photo.save(html,count)
         count+=1
-    
 
 
+#获得说说
+    url = 'https://user.qzone.qq.com/proxy/'+\
+          'domain/taotao.qq.com/cgi-bin/emo'+\
+          'tion_cgi_msglist_v6?uin='+name+'&ftype=0&s'+\
+          'ort=0&pos=0&num=20&replynum=100&g_tk='+hashes+\
+          '&callback=_preloadCallback&code_version=1&f'+\
+          'ormat=jsonp&need_private_comment=1&qzonetoken='+\
+          g_qzonetoken+'&g_tk='+hashes
+    page = browser.get(url)
+    html = browser.page_source
+    undergo.then(html)
 
 
 
