@@ -134,6 +134,7 @@ def loginn(name,pwd):
         page = browser.get(url)
         html = browser.page_source
         undergo.then(html)
+        browser.quit()
 
         
     else:
